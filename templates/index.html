@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shanmuga Industries Arts and Science College</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shanmuga Industries Arts and Science College</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <div class="container">
 
-    <div class="header">
-        <h1>🎓 Shanmuga Industries Arts and Science College</h1>
-        <p>AI College Information Chatbot</p>
-    </div>
+<div class="header">
+<h1>🎓 Shanmuga Industries Arts and Science College</h1>
+<p>AI College Information Chatbot</p>
+</div>
 
-    <div id="chat-box">
-        <div class="bot">
-            👋 Welcome! Ask me anything about the college.
-        </div>
-    </div>
+<div id="chat-box">
 
-    <div class="input-area">
-        <input type="text" id="message"
-               placeholder="Ask your question..."
-               onkeypress="enterKey(event)">
+<div class="bot-message">
+👋 Welcome! Ask me anything about the college.
+</div>
 
-        <button onclick="sendMessage()">Send</button>
-    </div>
+</div>
+
+<div class="input-area">
+
+<input
+type="text"
+id="message"
+placeholder="Type your question..."
+onkeypress="enterKey(event)"
+>
+
+<button onclick="sendMessage()">➤</button>
+
+</div>
 
 </div>
 

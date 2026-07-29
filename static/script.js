@@ -1,52 +1,71 @@
-async function sendMessage(){
+async function sendMessage() {
 
-    let message=document.getElementById("message").value;
+    const input = document.getElementById("message");
+    const message = input.value.trim();
 
-    if(message=="") return;
+    if (message === "") return;
 
-    let chat=document.getElementById("chat-box");
+    const chatBox = document.getElementById("chat-box");
 
-    chat.innerHTML+=`
-    <div class="user">
-        ${message}
-    </div>
+    // User Message
+    chatBox.innerHTML += `
+        <div class="user-message">
+            ${message}
+        </div>
     `;
 
-    chat.innerHTML+=`
-    <div class="bot" id="typing">
-        🤖 Typing...
-    </div>
-    `;
+    input.value = "";
 
-    chat.scrollTop=chat.scrollHeight;
+    // Typing Animation
+    const typing = document.createElement("div");
+    typing.className = "bot-message";
+    typing.id = "typing";
+    typing.innerHTML = "🤖 Typing...";
+    chatBox.appendChild(typing);
 
-    let response=await fetch("/chat",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            message:message
-        })
-    });
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    let data=await response.json();
+    try {
 
-    document.getElementById("typing").remove();
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
 
-    chat.innerHTML+=`
-    <div class="bot">
-        ${data.answer}
-    </div>
-    `;
+        const data = await response.json();
 
-    document.getElementById("message").value="";
+        document.getElementById("typing").remove();
 
-    chat.scrollTop=chat.scrollHeight;
+        chatBox.innerHTML += `
+            <div class="bot-message">
+                🤖 ${data.answer}
+            </div>
+        `;
+
+    } catch (error) {
+
+        document.getElementById("typing").remove();
+
+        chatBox.innerHTML += `
+            <div class="bot-message">
+                ❌ Error connecting to server.
+            </div>
+        `;
+
+    }
+
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 function enterKey(event){
+
     if(event.key==="Enter"){
         sendMessage();
     }
+
 }
