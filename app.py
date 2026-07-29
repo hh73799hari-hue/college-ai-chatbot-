@@ -1,70 +1,73 @@
 import os
-
-# Prevent OpenBLAS memory issues
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-os.environ["OMP_NUM_THREADS"] = "1"
-
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 
-# Load .env variables
 load_dotenv()
 
 app = Flask(__name__)
 
-# Load Embedding Model
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+# College Information
+college_context = """
+SHANMUGA INDUSTRIES ARTS AND SCIENCE COLLEGE
 
-# Load FAISS Database
-db = FAISS.load_local(
-    "vectorstore",
-    embeddings,
-    allow_dangerous_deserialization=True
-)
+About:
+Shanmuga Industries Arts and Science College (SIASC) is located in Tiruvannamalai District, Tamil Nadu.
 
-print("✅ FAISS Database Loaded Successfully!")
+Established:
+1996
 
-# Load Groq LLM
+Affiliation:
+Thiruvalluvar University
+
+Courses Offered:
+1. B.Sc Data Science
+2. B.Sc Computer Science
+3. BCA
+4. B.Com
+5. BBA
+6. BA English
+7. BA Tamil
+
+Facilities:
+Library
+Computer Lab
+Hostel
+Transport
+Placement Cell
+Sports
+Wi-Fi Campus
+"""
+
 llm = ChatGroq(
     model_name="llama-3.1-8b-instant",
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.3
 )
 
-# Home Page
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# Chat API
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
-
-    question = data.get("message", "")
-
-    # Search relevant documents
-    docs = db.similarity_search(question, k=3)
-
-    context = "\n\n".join(doc.page_content for doc in docs)
+    question = data["message"]
 
     prompt = f"""
-You are a College Information Assistant.
+You are an AI College Information Chatbot.
 
-Answer ONLY using the given context.
+Answer ONLY using the information below.
 
-If the answer is not available in the context, reply:
+If the answer is not available, reply:
+
 "I don't have information about that."
 
-Context:
-{context}
+College Information:
+
+{college_context}
 
 Question:
 {question}
@@ -74,16 +77,8 @@ Answer:
 
     response = llm.invoke(prompt)
 
-    return jsonify({
-        "answer": response.content
-    })
+    return jsonify({"answer": response.content})
 
 
-# Run Flask App
 if __name__ == "__main__":
-    print("🚀 College AI Chatbot Started...")
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
-        debug=False
-    )
+    app.run(host="0.0.0.0", port=5000)
