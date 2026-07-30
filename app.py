@@ -1,73 +1,93 @@
 import os
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
+
 from langchain_groq import ChatGroq
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
 load_dotenv()
 
 app = Flask(__name__)
 
-# College Information
-college_context = """
-SHANMUGA INDUSTRIES ARTS AND SCIENCE COLLEGE
+# -----------------------------
+# Load Embedding Model
+# -----------------------------
+print("Loading Embedding Model...")
 
-About:
-Shanmuga Industries Arts and Science College (SIASC) is located in Tiruvannamalai District, Tamil Nadu.
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
-Established:
-1996
+print("Embedding Model Loaded.")
 
-Affiliation:
-Thiruvalluvar University
+# -----------------------------
+# Load FAISS Vector Database
+# -----------------------------
+print("Loading FAISS Vector Database...")
 
-Courses Offered:
-1. B.Sc Data Science
-2. B.Sc Computer Science
-3. BCA
-4. B.Com
-5. BBA
-6. BA English
-7. BA Tamil
+vector_db = FAISS.load_local(
+    "vectorstore",
+    embeddings,
+    allow_dangerous_deserialization=True
+)
 
-Facilities:
-Library
-Computer Lab
-Hostel
-Transport
-Placement Cell
-Sports
-Wi-Fi Campus
-"""
+retriever = vector_db.as_retriever(
+    search_kwargs={"k": 3}
+)
 
+print("FAISS Vector Database Loaded.")
+
+# -----------------------------
+# Load Groq LLM
+# -----------------------------
 llm = ChatGroq(
     model_name="llama-3.1-8b-instant",
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.3
 )
 
-
+# -----------------------------
+# Home Page
+# -----------------------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
+# -----------------------------
+# Chat API
+# -----------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    question = data["message"]
 
-    prompt = f"""
+    data = request.get_json()
+    question = data.get("message", "")
+
+    try:
+
+        docs = retriever.invoke(question)
+
+        context = "\n\n".join(
+            [doc.page_content for doc in docs]
+        )
+
+        prompt = f"""
 You are an AI College Information Chatbot.
 
-Answer ONLY using the information below.
+Answer ONLY using the information given below.
 
-If the answer is not available, reply:
+Rules:
 
+1. Give short and accurate answers.
+2. If the answer is unavailable, reply:
 "I don't have information about that."
+3. Do not create your own answers.
+4. If fees are asked, provide the exact fee.
+5. If multiple courses are asked, list them clearly.
 
 College Information:
 
-{college_context}
+{context}
 
 Question:
 {question}
@@ -75,10 +95,20 @@ Question:
 Answer:
 """
 
-    response = llm.invoke(prompt)
+        response = llm.invoke(prompt)
 
-    return jsonify({"answer": response.content})
+        return jsonify({
+            "answer": response.content
+        })
 
+    except Exception as e:
 
+        return jsonify({
+            "answer": str(e)
+        })
+
+# -----------------------------
+# Run App
+# -----------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
