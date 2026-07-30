@@ -1,21 +1,27 @@
+import os
+
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+print("🚀 RAG Vector Creation Started...")
 
-print("RAG Vector Creation Started...")
+documents = []
 
+# Load all TXT files from data folder
+for file in os.listdir("data"):
+    if file.endswith(".txt"):
+        print(f"Loading: {file}")
+        loader = TextLoader(
+            os.path.join("data", file),
+            encoding="utf-8"
+        )
+        documents.extend(loader.load())
 
-# Load Text File
-loader = TextLoader("data/About_College.txt", encoding="utf-8")
-documents = loader.load()
+print(f"✅ Total Files Loaded: {len(documents)}")
 
-print("Text File Loaded Successfully")
-print("Total Documents:", len(documents))
-
-
-# Split Text
+# Split text
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=50
@@ -23,25 +29,21 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 chunks = text_splitter.split_documents(documents)
 
-print("Text Chunks Created:", len(chunks))
+print(f"✅ Total Chunks Created: {len(chunks)}")
 
-
-# Embedding Model
+# Embedding model
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-print("Embedding Model Loaded")
+print("✅ Embedding Model Loaded")
 
-
-# Create FAISS Vector Database
+# Create FAISS
 vector_db = FAISS.from_documents(
     chunks,
     embeddings
 )
 
-
-# Save Database
 vector_db.save_local("vectorstore")
 
-print("FAISS Vector Database Created Successfully!")
+print("🎉 FAISS Vector Database Created Successfully!")

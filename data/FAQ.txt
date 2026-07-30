@@ -1,0 +1,88 @@
+SHANMUGA INDUSTRIES ARTS AND SCIENCE COLLEGE
+
+Question: What is the name of the college?
+Answer: The name of the institution is Shanmuga Industries Arts and Science College (SIASC).
+
+Question: Where is the college located?
+Answer: The college is located on Manalurpet Road, Tiruvannamalai, Tamil Nadu.
+
+Question: Which university is the college affiliated with?
+Answer: The college is affiliated with Thiruvalluvar University.
+
+Question: When was the college established?
+Answer: The college was established in 1996.
+
+Question: Does the college offer B.Sc. Data Science?
+Answer: Yes. The college offers B.Sc. Data Science.
+
+Question: Does the college offer BCA?
+Answer: Yes. The college offers Bachelor of Computer Applications (BCA).
+
+Question: Does the college offer B.Com?
+Answer: Yes. The college offers B.Com, B.Com Computer Applications, and B.Com Finance & Accounting.
+
+Question: What UG courses are available?
+Answer: The college offers various UG courses including B.A., B.Sc., B.Com., BBA, and BCA programmes.
+
+Question: Does the college provide hostel facilities?
+Answer: Yes. Hostel facilities are available for students.
+
+Question: Is transport available?
+Answer: Yes. Transport facilities are available from nearby locations.
+
+Question: Is Wi-Fi available on campus?
+Answer: Yes. Wi-Fi facilities are available on campus.
+
+Question: Does the college have a library?
+Answer: Yes. The college has a well-equipped library with books, journals, and digital learning resources.
+
+Question: Is there a placement cell?
+Answer: Yes. The college has a dedicated Placement Cell that provides placement training and campus recruitment support.
+
+Question: What is the annual fee for B.Sc. Data Science?
+Answer: The annual fee for B.Sc. Data Science is ₹31,000.
+
+Question: What is the annual fee for BCA?
+Answer: The annual fee for BCA is ₹31,000.
+
+Question: What is the annual fee for B.Com?
+Answer: The annual fee for B.Com is ₹21,000.
+
+Question: What is the annual fee for B.Com CA?
+Answer: The annual fee for B.Com Computer Applications is ₹22,000.
+
+Question: What is the annual fee for BBA?
+Answer: The annual fee for BBA is ₹17,000.
+
+Question: How can I apply for admission?
+Answer: Students can apply through the admission office or by following the admission procedure available on the official college website.
+
+Question: What documents are required for admission?
+Answer: Students should submit mark sheets, Transfer Certificate, Conduct Certificate, Aadhaar copy, passport-size photographs, and other required documents.
+
+Question: Does the college provide scholarships?
+Answer: Eligible students can apply for Government Scholarships and other scholarship schemes as per rules.
+
+Question: What facilities are available on campus?
+Answer: The college provides library, laboratories, Wi-Fi, hostel, transport, placement cell, sports, canteen, seminar hall, NSS, and student support services.
+
+Question: What is the official website of the college?
+Answer: https://shanmugacollege.edu.in
+
+Question: What are the office timings?
+Answer: Monday to Friday: 9:00 AM to 5:00 PM. Saturday: 9:00 AM to 1:00 PM. Sunday is a holiday.
+
+Question: Does the college conduct seminars and workshops?
+Answer: Yes. Every department regularly conducts seminars, workshops, guest lectures, and industrial visits.
+
+Question: Does the college encourage sports and cultural activities?
+Answer: Yes. Students are encouraged to participate in sports, cultural events, and extracurricular activities.
+
+Question: Is practical laboratory training available?
+Answer: Yes. Practical laboratory facilities are available for science and computer-related courses.
+
+Question: Does the college provide career guidance?
+Answer: Yes. Career guidance, aptitude training, resume preparation, and interview training are provided through the Placement Cell.
+
+Question: Can students participate in NSS activities?
+Answer: Yes. The college actively conducts NSS and community service activities.
