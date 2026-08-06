@@ -1,46 +1,71 @@
 import os
 import pickle
+import re
 
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-
-from sklearn.metrics.pairwise import cosine_similarity
 from langchain_groq import ChatGroq
 
-
-# --------------------------------
-# Load environment variables
-# --------------------------------
-
 load_dotenv()
-
-
-# --------------------------------
-# Flask App
-# --------------------------------
 
 app = Flask(__name__)
 
 
 # --------------------------------
-# Load Lightweight Vector Database
+# Load Lightweight Documents
 # --------------------------------
 
 print("Loading lightweight vector database...")
 
-
-with open("vectorstore/data.pkl", "rb") as file:
-
-    vector_data = pickle.load(file)
-
-
-documents = vector_data["documents"]
-vectorizer = vector_data["vectorizer"]
-vectors = vector_data["vectors"]
-
+with open("vectorstore/data_light.pkl", "rb") as file:
+    documents = pickle.load(file)
 
 print("✅ Vector database loaded.")
 print(f"Total chunks: {len(documents)}")
+
+
+# --------------------------------
+# Simple Keyword Retrieval
+# --------------------------------
+
+def retrieve_documents(question, documents, top_k=3):
+
+    question_words = set(
+        re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            question.lower()
+        )
+    )
+
+    scored_documents = []
+
+    for document in documents:
+
+        document_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                document.lower()
+            )
+        )
+
+        score = len(
+            question_words.intersection(document_words)
+        )
+
+        if score > 0:
+            scored_documents.append(
+                (score, document)
+            )
+
+    scored_documents.sort(
+        key=lambda x: x[0],
+        reverse=True
+    )
+
+    return [
+        document
+        for score, document in scored_documents[:top_k]
+    ]
 
 
 # --------------------------------
@@ -49,13 +74,11 @@ print(f"Total chunks: {len(documents)}")
 
 print("Loading Groq LLM...")
 
-
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.2
 )
-
 
 print("✅ Groq LLM loaded.")
 
@@ -81,8 +104,10 @@ def chat():
 
         data = request.get_json()
 
-        question = data.get("message", "").strip()
-
+        question = data.get(
+            "message",
+            ""
+        ).strip()
 
         if not question:
 
@@ -92,57 +117,30 @@ def chat():
 
 
         # --------------------------------
-        # Convert question to TF-IDF
+        # Retrieve Relevant Documents
         # --------------------------------
 
-        question_vector = vectorizer.transform(
-            [question]
+        selected_documents = retrieve_documents(
+            question,
+            documents,
+            top_k=3
         )
 
 
         # --------------------------------
-        # Calculate similarity
-        # --------------------------------
-
-        similarities = cosine_similarity(
-            question_vector,
-            vectors
-        )[0]
-
-
-        # --------------------------------
-        # Get top 3 relevant chunks
-        # --------------------------------
-
-        top_indices = similarities.argsort()[-3:][::-1]
-
-
-        selected_documents = []
-
-        for index in top_indices:
-
-            # Ignore very weak matches
-
-            if similarities[index] > 0:
-
-                selected_documents.append(
-                    documents[index]
-                )
-
-
-        # --------------------------------
-        # No relevant information
+        # No Relevant Information
         # --------------------------------
 
         if not selected_documents:
 
             return jsonify({
-                "answer": "I don't have information about that."
+                "answer":
+                "I don't have information about that."
             })
 
 
         # --------------------------------
-        # Build context
+        # Build Context
         # --------------------------------
 
         context = "\n\n".join(
@@ -164,12 +162,12 @@ STRICT RULES:
 1. Do not use outside knowledge.
 2. Do not guess.
 3. Do not invent information.
-4. If the answer is not explicitly available in the context, reply exactly:
+4. If the answer is not available in the context, reply exactly:
 "I don't have information about that."
 5. Give short and clear answers.
 6. If multiple items are available, list them clearly.
 7. For fees, provide only the fee mentioned in the context.
-8. Do not add facilities, courses, fees or details that are not present in the context.
+8. Do not add information that is not present in the context.
 
 CONTEXT:
 
@@ -184,11 +182,10 @@ ANSWER:
 
 
         # --------------------------------
-        # Generate answer
+        # Generate Answer
         # --------------------------------
 
         response = llm.invoke(prompt)
-
 
         return jsonify({
             "answer": response.content
@@ -200,7 +197,8 @@ ANSWER:
         print("ERROR:", e)
 
         return jsonify({
-            "answer": "Sorry, something went wrong."
+            "answer":
+            "Sorry, something went wrong."
         })
 
 
@@ -211,7 +209,10 @@ ANSWER:
 if __name__ == "__main__":
 
     port = int(
-        os.environ.get("PORT", 5000)
+        os.environ.get(
+            "PORT",
+            5000
+        )
     )
 
     app.run(
