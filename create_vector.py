@@ -1,49 +1,84 @@
 import os
+import pickle
 
-from langchain_community.document_loaders import TextLoader
+from sklearn.feature_extraction.text import TfidfVectorizer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
 
-print("🚀 RAG Vector Creation Started...")
 
-documents = []
+# --------------------------------
+# Find data folder
+# --------------------------------
 
-# Load all TXT files from data folder
-for file in os.listdir("data"):
-    if file.endswith(".txt"):
-        print(f"Loading: {file}")
-        loader = TextLoader(
-            os.path.join("data", file),
-            encoding="utf-8"
-        )
-        documents.extend(loader.load())
+DATA_FOLDER = "data"
 
-print(f"✅ Total Files Loaded: {len(documents)}")
+if not os.path.exists(DATA_FOLDER):
+    print("❌ data folder not found!")
+    exit()
 
-# Split text
-text_splitter = RecursiveCharacterTextSplitter(
+print("📚 Reading college data...")
+
+
+# --------------------------------
+# Read all TXT files
+# --------------------------------
+
+all_text = ""
+
+for filename in os.listdir(DATA_FOLDER):
+
+    if filename.endswith(".txt"):
+
+        filepath = os.path.join(DATA_FOLDER, filename)
+
+        print(f"Reading: {filename}")
+
+        with open(filepath, "r", encoding="utf-8") as file:
+            all_text += "\n" + file.read()
+
+
+# --------------------------------
+# Split text into chunks
+# --------------------------------
+
+splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=50
 )
 
-chunks = text_splitter.split_documents(documents)
+documents = splitter.split_text(all_text)
 
-print(f"✅ Total Chunks Created: {len(chunks)}")
+print(f"Total chunks created: {len(documents)}")
 
-# Embedding model
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+
+# --------------------------------
+# Create TF-IDF Vectorizer
+# --------------------------------
+
+vectorizer = TfidfVectorizer(
+    lowercase=True,
+    stop_words="english"
 )
 
-print("✅ Embedding Model Loaded")
+vectors = vectorizer.fit_transform(documents)
 
-# Create FAISS
-vector_db = FAISS.from_documents(
-    chunks,
-    embeddings
-)
 
-vector_db.save_local("vectorstore")
+# --------------------------------
+# Save lightweight vector database
+# --------------------------------
 
-print("🎉 FAISS Vector Database Created Successfully!")
+os.makedirs("vectorstore", exist_ok=True)
+
+with open("vectorstore/data.pkl", "wb") as file:
+
+    pickle.dump(
+        {
+            "documents": documents,
+            "vectorizer": vectorizer,
+            "vectors": vectors
+        },
+        file
+    )
+
+
+print("✅ Lightweight vector database created!")
+print("📁 Saved inside: vectorstore/data.pkl")
